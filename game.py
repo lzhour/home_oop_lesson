@@ -3,6 +3,7 @@ import pyglet
 from pyglet.window import key
 from core import GameElement
 import sys
+import random
 
 #### DO NOT TOUCH ####
 GAME_BOARD = None
@@ -11,8 +12,8 @@ KEYBOARD = None
 PLAYER = None
 ######################
 
-GAME_WIDTH = 5
-GAME_HEIGHT = 5
+GAME_WIDTH = 7
+GAME_HEIGHT = 7
 
 
 #### Put class definitions here ####
@@ -22,7 +23,11 @@ class Rock(GameElement):
 	SOLID = True
 
 class Character(GameElement):
-	IMAGE = "Girl" # making a class attribute IMAGE, containing a value of "Girl"
+	IMAGE = "Cat" # making a class attribute IMAGE, containing a value of "Girl"
+
+	def __init__(self):
+		GameElement.__init__(self)
+		self.inventory = []
 
 	def next_pos(self, direction):
 		if direction == "up":
@@ -33,15 +38,26 @@ class Character(GameElement):
 			return (self.x-1, self.y)
 		elif direction == "right":
 			return (self.x+1, self.y)
-		return None  
+		return None 
+
+class Gem(GameElement):
+	IMAGE = "BlueGem"
+	SOLID = False
 
 	def interact(self, player):
 		player.inventory.append(self)
 		GAME_BOARD.draw_msg("You just acquired a gem! You have %d items!" % (len(player.inventory)))
 
+class Regular_Tree(GameElement):
+	IMAGE = "ShortTree"
+	SOLID = False
 
-class Gem(GameElement):
-	IMAGE = "BlueGem"
+class Good_Tree(GameElement):
+	IMAGE = "ShortTree"
+	SOLID = False
+
+class Bad_Tree(GameElement):
+	IMAGE = "ShortTree"
 	SOLID = False
 
 ####   End class definitions    ####
@@ -51,28 +67,79 @@ def initialize():
 	global PLAYER
 	PLAYER = Character()
 	GAME_BOARD.register(PLAYER)
-	GAME_BOARD.set_el(2, 2, PLAYER)
+	GAME_BOARD.set_el(3, 3, PLAYER)
 	print PLAYER
 
 	GAME_BOARD.draw_msg("This game is wicked awesome.")
 
-	#list of rock position
-	rock_positions = [
-			(2, 1),
-			(1, 2),
-			(3, 2),
-			(2, 3),
-		]
+	tree_positions = []
 
-	rocks = []
+	def random_position():
+		random_x = random.randint(1,6)
+		random_y = random.randint(1,6)
 
-	for pos in rock_positions:
-		rock = Rock()
-		GAME_BOARD.register(rock)
-		GAME_BOARD.set_el(pos[0],pos[1], rock)
-		rocks.append(rock)
+		new_pos = (random_x, random_y)
 
-	rocks[-1].SOLID = False # making the bottom-most rock as intangible
+		tree_positions.append(new_pos)
+
+	if len(tree_positions) <= 2:
+		for i in range(2):
+			random_position()
+
+	if len(tree_positions) == 2:
+		if tree_positions[0] == tree_positions[1]:
+			del tree_positions[1]
+			random_position()
+		else:
+			random_position()
+			if tree_positions[2] == (tree_positions[0] or tree_positions[1]):
+				del tree_positions[-1]
+				random_position()	
+
+	trees = []
+
+	for pos in tree_positions:
+		reg_tree = Regular_Tree()
+		GAME_BOARD.register(reg_tree)
+		GAME_BOARD.set_el(pos[0][0],pos[0][1], reg_tree)
+		trees.append(reg_tree)
+
+
+		good_tree = Good_Tree()
+		GAME_BOARD.register(good_tree)
+		GAME_BOARD.set_el(pos[1][0],pos[1][1], good_tree)
+		trees.append(good_tree)
+
+		bad_tree = Bad_Tree()
+		GAME_BOARD.register(bad_tree)
+		GAME_BOARD.set_el(pos[pos[2][0],pos[2][1], bad_tree)
+		trees.append(bad_tree)
+
+
+	# for pos in tree_positions:
+	# 	regular_tree = Regular_Tree()
+	# 	GAME_BOARD.register(regular_tree)
+	# 	GAME_BOARD.set_el(pos[0],pos[1], rock)
+	# 	rocks.append(rock)
+
+
+	# #list of rock position
+	# rock_positions = [
+	# 		(2, 1),
+	# 		(1, 2),
+	# 		(3, 2),
+	# 		(2, 3),
+	# 	]
+
+	# rocks = []
+
+	# for pos in rock_positions:
+	# 	rock = Rock()
+	# 	GAME_BOARD.register(rock)
+	# 	GAME_BOARD.set_el(pos[0],pos[1], rock)
+	# 	rocks.append(rock)
+
+	# rocks[-1].SOLID = False # making the bottom-most rock as intangible
 
 	# # Initialize and register rock 1
 	# rock1 = Rock() # This creates an instance, rock1, of a class, Rock().
@@ -98,13 +165,13 @@ def initialize():
 	# print "The first rock is at", (rock1.x, rock1.y)
 	# print "The second rock is at", (rock2.x, rock2.y)
 
-	for rock in rocks:
-		print rock
+	# for rock in rocks:
+	# 	print rock
 
-	# add gem instance
-	gem = Gem()
-	GAME_BOARD.register(gem)
-	GAME_BOARD.set_el(3, 1, gem)
+	# # add gem instance
+	# gem = Gem()
+	# GAME_BOARD.register(gem)
+	# GAME_BOARD.set_el(3, 1, gem)
 
 
 def keyboard_handler():
@@ -155,10 +222,6 @@ def keyboard_handler():
 			# if none or not SOLID, walk through
 			GAME_BOARD.del_el(PLAYER.x, PLAYER.y)
 			GAME_BOARD.set_el(next_x, next_y, PLAYER)
-
-def __init__(self):
-	GameElement.__init__(self)
-	self.inventory = []
 
 
 
